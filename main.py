@@ -41,7 +41,7 @@ class Card:
         self.power = power
 
     def __str__(self):
-        return "{name} of {color}".format(
+        return "{name} of {color}.".format(
             name=self.name, color=self.color, power=self.power
         )
 
