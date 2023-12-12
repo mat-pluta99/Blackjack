@@ -68,34 +68,38 @@ class Contestant:
 
 
 class Player(Contestant):
-    def __init__(self) -> None:
+    def __init__(self):
         Contestant.__init__(self)
         self.name = input("Enter a name: ")
         self.chips = 3000
 
     def bet(self):
-        self.bet = input(
-            "{player}, how much do you want to bet: ".format(player=self.name)
+        self.bet = int(
+            input("{player}, how much do you want to bet: ".format(player=self.name))
         )
 
     def double_down(self):
+        print(self.name, "doubles down!")
+        self.bet *= 2
         self.draw()
-        print(self.name, "doubles down and draws", self.hand[-1])
 
     def call(self):
         self.draw()
 
     def stand(self):
-        pass
+        print(self.name, "stands.")
 
     def fold(self):
-        pass
+        print(self.name, "folds.")
+        self.lose()
 
     def lose(self):
-        pass
+        print(self.name, "loses", self.bet, "chips...")
+        self.chips -= self.bet
 
     def win(self):
-        pass
+        print(self.name, "wins", self.bet, "chips!")
+        self.chips += self.bet
 
     def split(self):
         pass
@@ -106,5 +110,11 @@ if __name__ == "__main__":
     dealer = Contestant()
     deck = shuffle_deck()
     player = Player()
-    dealer.draw()
+
+    player.bet()
     player.double_down()
+    player.call()
+    player.stand()
+    player.fold()
+    player.lose()
+    player.win()
