@@ -1,5 +1,3 @@
-from classes import *
-
 import random
 
 
@@ -43,7 +41,7 @@ class Card:
         self.power = power
 
     def __str__(self):
-        return "This is {name} of {color}. It's power is {power}.".format(
+        return "{name} of {color}".format(
             name=self.name, color=self.color, power=self.power
         )
 
@@ -87,9 +85,6 @@ class Player(Contestant):
     def call(self):
         self.draw()
 
-    def split(self):
-        pass
-
     def stand(self):
         pass
 
@@ -102,10 +97,14 @@ class Player(Contestant):
     def win(self):
         pass
 
+    def split(self):
+        pass
+
 
 if __name__ == "__main__":
     # -----INITIALIZING A DEALER -----
     dealer = Contestant()
     deck = shuffle_deck()
-
+    player = Player()
     dealer.draw()
+    player.double_down()
