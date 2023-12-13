@@ -3,7 +3,7 @@ from time import sleep as sleep
 
 # TODO:
 # finish split()
-# chips need to be won!
+# chips need to be won! do a check if: dealer busted, if a player busted, if a player has a better hand than dealer
 # oh and do something that the player wins a proper amount of chips for each hand, when he splits his initial hand
 # check for blackjacks
 # create a bust status
