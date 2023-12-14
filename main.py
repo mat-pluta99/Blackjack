@@ -5,8 +5,6 @@ from time import sleep as sleep
 # finish split()
 # chips need to be won! do a check if: dealer busted, if a player busted, if a player has a better hand than dealer
 # oh and do something that the player wins a proper amount of chips for each hand, when he splits his initial hand
-# check for blackjacks
-# create a bust status
 
 
 # -----INITIALIZING A DECK OF 52 CARDS-----
@@ -61,30 +59,32 @@ class Contestant:
         self.dealer = True
         self.name = "Dealer"
         self.hand = list()
+        self.split_hand = list()
+        self.split_hand_power = 0
         self.hand_power = 0
         Contestant.contestants.append(self)
 
-    def draw(self):
+    def draw(self, hand, hand_power):
         drawn_card = deck.pop(0)
-        self.hand.append(drawn_card)
-        if self.name == "Dealer" and len(self.hand) == 2:
+        hand.append(drawn_card)
+        if self.name == "Dealer" and len(hand) == 2:
             print("Dealer draws a second card.")
         else:
             print(self.name, "draws", drawn_card.name, "of", drawn_card.color)
-        if self.hand_power + drawn_card.power > 21:
+        if hand_power + drawn_card.power > 21:
             if drawn_card.name == "Ace":
                 drawn_card.power = 1
-            if self.hand_power + drawn_card.power > 21:
+            if hand_power + drawn_card.power > 21:
                 print(self.name, "busts!")
                 sleep(1)
-                self.hand_power += drawn_card.power
+                hand_power += drawn_card.power
             else:
-                self.hand_power += drawn_card.power
+                hand_power += drawn_card.power
         else:
-            self.hand_power += drawn_card.power
+            hand_power += drawn_card.power
 
-    def stand(self):
-        print(self.name, "stands with a hand power of", self.hand_power)
+    def stand(self, hand_power):
+        print(self.name, "stands with a hand power of", hand_power)
 
 
 class Player(Contestant):
@@ -111,29 +111,46 @@ class Player(Contestant):
         print(self.name, "folds.")
         self.lose()
 
+    def win(self):
+        if player.split == False:
+            print(self.name, "wins", self.bet, "chips!")
+            self.chips += self.bet
+
     def lose(self):
         print(self.name, "loses", self.bet, "chips...")
         self.chips -= self.bet
 
-    def win(self):
-        print(self.name, "wins", self.bet, "chips!")
-        self.chips += self.bet
-
     def split(self):
-        print("DUPA")
-        for card in self.hand:
-            pass
+        self.split = True
+        self.split_bet = self.bet
+        split_card = self.hand.pop(1)
+        self.split_hand.append(split_card)
+        print("DRAW TO THE FIRST HAND:", end=" ")
+        self.draw()
+        print("DRAW TO THE SECOND HAND:", end=" ")
+        self.draw(self.split_hand)
+        print("---FIRST HAND---")
+        self.choice()
+        print("---SECOND HAND---")
+        self.choice(self.split_hand, self.split_hand_power)
+        if self.hand_power > 21 and self.split_hand_power > 21:
+            self.busted = True
+            print(self.name, "busts with both hands!")
 
-    def choice(self):
+    def choice(self, hand, hand_power):
         self.turn_ended = False
         while self.turn_ended is False:
-            if self.hand_power > 21:
+            if hand_power > 21:
                 self.turn_ended = True
                 break
             print("c- call", end=" ")
             if len(self.hand) < 3:
                 print("d- call", end=" ")
-            if self.hand[0].name == self.hand[1].name and len(self.hand) < 3:
+            if (
+                self.hand[0].name == self.hand[1].name
+                and len(self.hand) < 3
+                and self.split == False
+            ):
                 print("spl - split")
             print("s- stand", "f - fold", end=" ")
             print("| hand power:", self.hand_power)
@@ -170,14 +187,62 @@ if __name__ == "__main__":
         new_player = Player()
         print("Welcome,", new_player.name)
     for player in Contestant.contestants[1:]:
+        player.split = False
+        player.busted = False
         player.bet()
     for i in range(2):
         for player in Contestant.contestants:
-            player.draw()
+            player.draw(player.hand, player.hand_power)
     for player in Contestant.contestants[1:]:
         player.choice()
     while dealer.hand_power < 17:
-        dealer.draw()
+        dealer.draw(dealer.hand, dealer.hand_power)
     else:
         if dealer.hand_power < 21:
             dealer.stand()
+        else:
+            dealer.busted = True
+            print("Dealer busts!")
+    for player in Contestant.contestants[1:]:
+        if player.split == True:
+            if player.busted == True:
+                player.bet += player.split_bet
+                print(player.name, "loses", player.bet, "chips...")
+            elif player.busted == False:
+                if player.hand_power > 21 == False:
+                    if player.hand_power > dealer.hand_power:
+                        print(
+                            player.name,
+                            "wins",
+                            self.bet,
+                            "chips by first hand and",
+                            end=" ",
+                        )
+                        self.chips += self.bet
+                    elif player.hand_power < dealer.hand_power:
+                        print(
+                            player.name,
+                            "loses",
+                            self.bet,
+                            "chips by first hand and",
+                            end=" ",
+                        )
+                        self.chips -= self.bet
+                    else:
+                        print(player.name, "ties with dealer first hand and", end=" ")
+                elif player.split_hand_power > 21 == False:
+                    if player.split_hand_power > dealer.hand_power:
+                        print(
+                            player.name, "wins", self.split_bet, "chips by second hand!"
+                        )
+                        self.chips += self.split_bet
+                    elif player.split_hand_power < dealer.hand_power:
+                        print(
+                            player.name,
+                            "loses",
+                            self.split_bet,
+                            "chips by second hand!",
+                        )
+                        self.chips -= self.split_bet
+                    else:
+                        print(player.name, "ties with dealer by second hand!")
