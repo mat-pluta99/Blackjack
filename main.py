@@ -1,10 +1,13 @@
 import random
+<<<<<<< HEAD
 from time import sleep as sleep
 
 # TODO:
 # finish split()
 # chips need to be won! do a check if: dealer busted, if a player busted, if a player has a better hand than dealer
 # oh and do something that the player wins a proper amount of chips for each hand, when he splits his initial hand
+=======
+>>>>>>> parent of cb74aed (game mechanics have been created)
 
 
 # -----INITIALIZING A DECK OF 52 CARDS-----
@@ -53,19 +56,16 @@ class Card:
 
 
 class Contestant:
-    contestants = list()
-
     def __init__(self):
-        self.dealer = True
         self.name = "Dealer"
         self.hand = list()
         self.split_hand = list()
         self.split_hand_power = 0
         self.hand_power = 0
-        Contestant.contestants.append(self)
 
     def draw(self, hand, hand_power):
         drawn_card = deck.pop(0)
+<<<<<<< HEAD
         hand.append(drawn_card)
         if self.name == "Dealer" and len(hand) == 2:
             print("Dealer draws a second card.")
@@ -78,19 +78,30 @@ class Contestant:
                 print(self.name, "busts!")
                 sleep(1)
                 hand_power += drawn_card.power
+=======
+        self.hand.append(drawn_card)
+        print(self.name, "draws", drawn_card.name, "of", drawn_card.color)
+        if self.hand_power + drawn_card.power > 21:
+            if drawn_card.name == "Ace":
+                drawn_card.power = 1
+            if self.hand_power + drawn_card.power > 21:
+                self.lose()
+>>>>>>> parent of cb74aed (game mechanics have been created)
             else:
                 hand_power += drawn_card.power
         else:
             hand_power += drawn_card.power
 
+<<<<<<< HEAD
     def stand(self, hand_power):
         print(self.name, "stands with a hand power of", hand_power)
 
+=======
+>>>>>>> parent of cb74aed (game mechanics have been created)
 
 class Player(Contestant):
     def __init__(self):
         Contestant.__init__(self)
-        self.dealer = False
         self.name = input("Enter a name: ")
         self.chips = 3000
 
@@ -107,6 +118,9 @@ class Player(Contestant):
     def call(self):
         self.draw()
 
+    def stand(self):
+        print(self.name, "stands.")
+
     def fold(self):
         print(self.name, "folds.")
         self.lose()
@@ -121,6 +135,7 @@ class Player(Contestant):
         self.chips -= self.bet
 
     def split(self):
+<<<<<<< HEAD
         self.split = True
         self.split_bet = self.bet
         split_card = self.hand.pop(1)
@@ -176,12 +191,16 @@ class Player(Contestant):
             else:
                 print("Wrong choice, {name}, try again!".format(name=self.name))
                 self.choice()
+=======
+        pass
+>>>>>>> parent of cb74aed (game mechanics have been created)
 
 
 if __name__ == "__main__":
-    # -----INITIALIZING A DEALER AND A PLAYER -----
+    # -----INITIALIZING A DEALER -----
     dealer = Contestant()
     deck = shuffle_deck()
+<<<<<<< HEAD
     how_many_players = int(input("Enter the amount of players: "))
     for i in range(0, how_many_players):
         new_player = Player()
@@ -246,3 +265,14 @@ if __name__ == "__main__":
                         self.chips -= self.split_bet
                     else:
                         print(player.name, "ties with dealer by second hand!")
+=======
+    player = Player()
+
+    player.bet()
+    player.double_down()
+    player.call()
+    player.stand()
+    player.fold()
+    player.lose()
+    player.win()
+>>>>>>> parent of cb74aed (game mechanics have been created)
