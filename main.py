@@ -153,28 +153,33 @@ class Player(Contestant):
                 print("spl - split")
             print("s- stand", "f - fold", end=" ")
             print("| hand power:", self.hand_power)
-            choice = input("Enter a choice: ")
-            choice = choice.lower()
-            if choice == "c":
-                self.call()
-            elif choice == "d" and len(self.hand) < 3:
-                self.double_down()
-                self.turn_ended = True
-            elif choice == "s":
-                self.stand()
-                self.turn_ended = True
-            elif choice == "f":
-                self.fold()
-                self.turn_ended = True
-            elif (
-                choice == "spl"
-                and self.hand[0].name == self.hand[1].name
-                and len(self.hand) < 3
-            ):
-                self.split()
-            else:
-                print("Wrong choice, {name}, try again!".format(name=self.name))
-                self.choice()
+            while True:
+                choice = input("Enter a choice: ")
+                try:
+                    choice = choice.lower()
+                    if choice == "c":
+                        self.call()
+                    elif choice == "d" and len(self.hand) < 3:
+                        self.double_down()
+                        self.turn_ended = True
+                    elif choice == "s":
+                        self.stand()
+                        self.turn_ended = True
+                    elif choice == "f":
+                        self.fold()
+                        self.turn_ended = True
+                    elif (
+                        choice == "spl"
+                        and self.hand[0].name == self.hand[1].name
+                        and len(self.hand) < 3
+                    ):
+                        self.split()
+                    else:
+                        raise
+                except:
+                    print("Wrong choice, {name}, try again!".format(name=self.name))
+                else:
+                    break
         sleep(1.2)
 
 
