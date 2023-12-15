@@ -209,7 +209,6 @@ if __name__ == "__main__":
         for player in Contestant.contestants:
             player.draw()
             sleep(1.2)
-    # MAKE A BLACKJACK CHECK HERE
     if dealer.hand_power == 21:
         print("The dealer has a Blackjack!")
         sleep(1.1)
@@ -235,7 +234,6 @@ if __name__ == "__main__":
     ):
         pass
     else:
-        # ---------------------------
         for player in Contestant.contestants[1:]:
             if player.hand_power == 21:
                 pass
@@ -243,60 +241,64 @@ if __name__ == "__main__":
                 print("---{name}'s turn---".format(name=player.name))
                 sleep(1)
                 player.choice()
-        print("---DEALER'S TURN---")
-        sleep(1)
-        print(
-            "The dealer's hand:",
-            dealer.hand[0],
-            "and",
-            dealer.hand[1],
-            "| hand power:",
-            dealer.hand_power,
-        )
-        sleep(1.2)
-        if any(player.busted == False for player in Contestant.contestants[1:]):
-            if any(player.folded == False for player in Contestant.contestants[1:]):
-                while dealer.hand_power < 17:
-                    dealer.draw()
-                if dealer.hand_power < 21:
-                    dealer.stand()
-                for player in Contestant.contestants[1:]:
-                    if player.folded:
-                        print("By folding,", end=" ")
-                        player.lose()
-                        continue
-                    print("{name}'s cards are:".format(name=player.name), end=" ")
-                    sleep(1.2)
-                    for card in player.hand:
-                        print(card.__str__(), end=" ")
-                        sleep(1.2)
-                    print(
-                        "\n{name}'s hand power is {hand_power}.".format(
-                            name=player.name, hand_power=player.hand_power
-                        )
-                    )
-                    sleep(1.3)
-                    if (
-                        player.hand_power < dealer.hand_power
-                        and dealer.hand_power < 22
-                        or player.busted == True
-                    ):
-                        player.lose()
-                    elif (
-                        player.hand_power > dealer.hand_power
-                        or player.busted == False
-                        and dealer.busted == True
-                    ):
-                        player.win()
-                    else:
-                        print(player.name, "ties with the dealer!")
-
-                        sleep(1.5)
-            else:
-                print("Every player has folded!")
-                for player in Contestant.contestants[1:]:
+        if any(
+            player.busted == False and player.folded == False
+            for player in Contestant.contestants[1:]
+        ):
+            print("---DEALER'S TURN---")
+            sleep(1)
+            print(
+                "The dealer's hand:",
+                dealer.hand[0],
+                "and",
+                dealer.hand[1],
+                "| hand power:",
+                dealer.hand_power,
+            )
+            sleep(1.2)
+        if any(
+            player.busted == False and player.folded == False
+            for player in Contestant.contestants[1:]
+        ):
+            while dealer.hand_power < 17:
+                dealer.draw()
+            if dealer.hand_power < 21:
+                dealer.stand()
+            for player in Contestant.contestants[1:]:
+                if player.folded:
+                    print("By folding,", end=" ")
                     player.lose()
+                    continue
+                if player.hand_power == 21 and len(player.hand) == 2:
+                    continue
+                print("{name}'s cards are:".format(name=player.name), end=" ")
+                sleep(1.2)
+                for card in player.hand:
+                    print(card.__str__(), end=" ")
+                    sleep(1.2)
+                print(
+                    "\n{name}'s hand power is {hand_power}.".format(
+                        name=player.name, hand_power=player.hand_power
+                    )
+                )
+                sleep(1.3)
+                if (
+                    player.hand_power < dealer.hand_power
+                    and dealer.hand_power < 22
+                    or player.busted == True
+                ):
+                    player.lose()
+                elif (
+                    player.hand_power > dealer.hand_power
+                    or player.busted == False
+                    and dealer.busted == True
+                ):
+                    player.win()
+                else:
+                    print(player.name, "ties with the dealer!")
+
+                    sleep(1.5)
         else:
-            print("Every player has busted!")
+            print("Every player has either busted or folded!")
             for player in Contestant.contestants[1:]:
                 player.lose()
