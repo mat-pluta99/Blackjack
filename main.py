@@ -188,7 +188,15 @@ if __name__ == "__main__":
     dealer = Contestant()
     deck = shuffle_deck()
 
-    how_many_players = int(input("Enter the amount of players: "))
+    while True:
+        try:
+            how_many_players = int(input("Enter the amount of players (max. 5): "))
+            if how_many_players in range(1, 6):
+                break
+            else:
+                raise
+        except:
+            print("Wrong input, try again!")
     for i in range(0, how_many_players):
         new_player = Player()
         print("Welcome,", new_player.name)
