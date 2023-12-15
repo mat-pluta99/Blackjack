@@ -4,6 +4,7 @@ from time import sleep as sleep
 
 # TODO:
 # finish split()
+# make sure that hand power resets after each round!
 # make sure that the player wins a proper amount of chips for each hand, when he splits his initial hand
 # make sure that dealer does not draw if every player has either busted, folded or scored a blackjack without additional drawing
 # ask if players want to stop or play again (partly implemented)
