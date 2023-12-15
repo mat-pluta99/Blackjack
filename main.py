@@ -6,7 +6,7 @@ from time import sleep as sleep
 # finish split()
 # make sure that the player wins a proper amount of chips for each hand, when he splits his initial hand
 # make sure that dealer does not draw if every player has either busted, folded or scored a blackjack without additional drawing
-# ask if players want to stop or play again
+# ask if players want to stop or play again (partly implemented)
 # if a player wants to stop and has enough chips to break a highscore, save his record to the ranking board in the menu
 # create a menu, where one can start a new game, see a ranking board or quit the game
 # describe a program and its functions!
@@ -53,6 +53,10 @@ for name in card_names:
 
 
 def shuffle_deck():
+    for contestant in Contestant.contestants:
+        for card in contestant.hand:
+            popped_card = contestant.hand.pop(0)
+            deck.append(popped_card)
     random.shuffle(deck)
     return deck
 
@@ -189,7 +193,6 @@ class Player(Contestant):
 
 
 def game():
-    # -----INITIALIZING A DEALER AND A PLAYER -----
     deck = shuffle_deck()
 
     while True:
@@ -208,7 +211,6 @@ def game():
     while True:
         round_()
         for player in Contestant.contestants[1:]:
-            player.chips = 0
             print(
                 "{name}, you have {chips}.".format(name=player.name, chips=player.chips)
             )
@@ -220,13 +222,13 @@ def game():
 
 
 def round_():
+    shuffle_deck()
+    for contestant in Contestant.contestants:
+        if contestant.name == "Dealer":
+            Contestant.contestants.remove(contestant)
     dealer = Contestant()
     move_dealer = Contestant.contestants.pop()
-    for p in Contestant.contestants:
-        print(p.name)
     Contestant.contestants.insert(0, move_dealer)
-    for p in Contestant.contestants:
-        print(p.name)
     for player in Contestant.contestants[1:]:
         player.bet()
     for i in range(2):
