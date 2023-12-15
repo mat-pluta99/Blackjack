@@ -5,45 +5,14 @@ from time import sleep as sleep
 # TODO:
 # finish split()
 # make sure that the player wins a proper amount of chips for each hand, when he splits his initial hand
-# make sure that a player can only bet max of 500 chips
-# make sure that there cannot be more than 5 players and less than 1 player
-# check if players have any chips left, if not - they are to be kicked out of the game!
+# make sure that dealer does not draw if every player has either busted, folded or scored a blackjack without additional drawing
 # ask if players want to stop or play again
 # if a player wants to stop and has enough chips to break a highscore, save his record to the ranking board in the menu
 # create a menu, where one can start a new game, see a ranking board or quit the game
+# describe a program and its functions!
+
+
 # -----INITIALIZING A DECK OF 52 CARDS-----
-def shuffle_deck():
-    deck = list()
-    card_names = (
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "Jack",
-        "Queen",
-        "King",
-        "Ace",
-    )
-    card_colors = ("Spades", "Hearts", "Diamonds", "Clubs")
-    power_limit = 10
-    power = 2
-    for name in card_names:
-        for color in card_colors:
-            if name == "Ace":
-                power = 11
-            new_card = Card(name, color, power)
-            deck.append(new_card)
-        if power < power_limit:
-            power += 1
-    random.shuffle(deck)
-    return deck
-
-
 class Card:
     def __init__(self, name, color, power):
         self.name = name
@@ -52,6 +21,40 @@ class Card:
 
     def __str__(self):
         return "{name} of {color}.".format(name=self.name, color=self.color)
+
+
+deck = list()
+card_names = (
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "Jack",
+    "Queen",
+    "King",
+    "Ace",
+)
+card_colors = ("Spades", "Hearts", "Diamonds", "Clubs")
+power_limit = 10
+power = 2
+for name in card_names:
+    for color in card_colors:
+        if name == "Ace":
+            power = 11
+        new_card = Card(name, color, power)
+        deck.append(new_card)
+    if power < power_limit:
+        power += 1
+
+
+def shuffle_deck():
+    random.shuffle(deck)
+    return deck
 
 
 class Contestant:
@@ -185,9 +188,8 @@ class Player(Contestant):
         sleep(1.2)
 
 
-if __name__ == "__main__":
+def game():
     # -----INITIALIZING A DEALER AND A PLAYER -----
-    dealer = Contestant()
     deck = shuffle_deck()
 
     while True:
@@ -203,6 +205,28 @@ if __name__ == "__main__":
         new_player = Player()
         print("Welcome,", new_player.name)
         sleep(1)
+    while True:
+        round_()
+        for player in Contestant.contestants[1:]:
+            player.chips = 0
+            print(
+                "{name}, you have {chips}.".format(name=player.name, chips=player.chips)
+            )
+            if player.chips == 0:
+                print("That makes you lose the game! :(")
+                Contestant.contestants.remove(player)
+            else:
+                another_round = input("Do you want to play another game?")
+
+
+def round_():
+    dealer = Contestant()
+    move_dealer = Contestant.contestants.pop()
+    for p in Contestant.contestants:
+        print(p.name)
+    Contestant.contestants.insert(0, move_dealer)
+    for p in Contestant.contestants:
+        print(p.name)
     for player in Contestant.contestants[1:]:
         player.bet()
     for i in range(2):
@@ -302,3 +326,6 @@ if __name__ == "__main__":
             print("Every player has either busted or folded!")
             for player in Contestant.contestants[1:]:
                 player.lose()
+
+
+game()
