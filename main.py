@@ -97,9 +97,21 @@ class Player(Contestant):
         self.folded = False
 
     def bet(self):
-        self.bet = int(
-            input("{player}, how much do you want to bet: ".format(player=self.name))
-        )
+        while True:
+            try:
+                self.bet = int(
+                    input(
+                        "{player}, how many chips do you want to bet (min. 1 and max. 500): ".format(
+                            player=self.name
+                        )
+                    )
+                )
+                if self.bet in range(1, 501) and self.bet in range(1, self.chips + 1):
+                    break
+            except ValueError:
+                print(
+                    "Wrong input, please bet from min. 1  to max. 500 chips. If you have less than 500 chips, you can only bet up to an amount of chips you have left."
+                )
 
     def double_down(self):
         print(self.name, "doubles down!")
