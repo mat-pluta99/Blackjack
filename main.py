@@ -101,8 +101,8 @@ class Player(Contestant):
             try:
                 self.bet = int(
                     input(
-                        "{player}, how many chips do you want to bet (min. 1 and max. 500): ".format(
-                            player=self.name
+                        "{player}, how many chips do you want to bet (min. 1 and max. 500)? You have {chips} chips: ".format(
+                            player=self.name, chips=self.chips
                         )
                     )
                 )
@@ -123,14 +123,16 @@ class Player(Contestant):
 
     def fold(self):
         print(self.name, "folds.")
-        self.folder = True
+        self.folded = True
 
     def lose(self):
+        self.bet = int(self.bet)
         print(self.name, "loses", self.bet, "chips...")
         self.chips -= self.bet
         sleep(1.2)
 
     def win(self):
+        self.bet = int(self.bet)
         print(self.name, "wins", self.bet, "chips!")
         self.chips += self.bet
         sleep(1.2)
@@ -147,7 +149,7 @@ class Player(Contestant):
                 self.busted = True
                 break
             print("c- call", end=" ")
-            if len(self.hand) < 3:
+            if len(self.hand) < 3 and self.bet <= (self.chips * 2):
                 print("d- double down", end=" ")
             if self.hand[0].name == self.hand[1].name and len(self.hand) < 3:
                 print("spl - split")
