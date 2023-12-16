@@ -11,6 +11,7 @@ from time import sleep as sleep
 # if a player wants to stop and has enough chips to break a highscore, save his record to the ranking board in the menu
 # create a menu, where one can start a new game, see a ranking board or quit the game
 # describe a program and its functions!
+# make sure a player cant draw no more if they have a hand power of 21
 
 
 # -----INITIALIZING A DECK OF 52 CARDS-----
@@ -55,7 +56,8 @@ for name in card_names:
 
 def shuffle_deck():
     for contestant in Contestant.contestants:
-        for card in contestant.hand:
+        contestant.hand_power = 0
+        while len(contestant.hand) != 0:
             popped_card = contestant.hand.pop(0)
             deck.append(popped_card)
     random.shuffle(deck)
@@ -102,7 +104,7 @@ class Player(Contestant):
         Contestant.__init__(self)
         self.name = input("Enter a name: ")
         self.chips = 3000
-        self.folded = False
+        self.play_again = True
 
     def make_bet(self):
         while True:
@@ -115,7 +117,6 @@ class Player(Contestant):
                     )
                 )
                 if self.bet in range(1, 501) and self.bet in range(1, self.chips + 1):
-                    print("DUPA")
                     break
             except ValueError:
                 print(
@@ -146,7 +147,6 @@ class Player(Contestant):
         sleep(1.2)
 
     def split(self):
-        print("DUPA")
         for card in self.hand:
             pass
 
@@ -216,19 +216,38 @@ def game():
             )
             if player.chips == 0:
                 print("That makes you lose the game! :(")
-                Contestant.contestants.remove(player)
+                player.play_again = False
             else:
-                another_round = input("Do you want to play another game?")
+                another_round = input("Do you want to play another game? (y/n): ")
+                if another_round.startswith("N") or another_round.startswith("n"):
+                    player.play_again = False
+                    print("See you around, {name}!".format(name=player.name))
 
 
 def round_():
     shuffle_deck()
-    for contestant in Contestant.contestants:
-        if contestant.name == "Dealer":
+    contestants_amount = len(Contestant.contestants)
+    for i in range(0, contestants_amount - 1):
+        contestant = Contestant.contestants[i]
+        print(contestant.name)
+        if contestant.name == "Dealer" or contestant.play_again == False:
             Contestant.contestants.remove(contestant)
+            i -= 1
     dealer = Contestant()
     move_dealer = Contestant.contestants.pop()
     Contestant.contestants.insert(0, move_dealer)
+    list_of_remaining = [
+        contestant
+        for contestant in Contestant.contestants
+        if contestant.name == "Dealer" or contestant.play_again == True
+    ]
+    Contestant.contestants = list_of_remaining
+    print("Remaining players:")
+    for player in Contestant.contestants[1:]:
+        player.busted = False
+        player.turn_ended = False
+        player.folded = False
+        print(player.name, "with", player.chips, "chips")
     for player in Contestant.contestants[1:]:
         player.make_bet()
     for i in range(2):
