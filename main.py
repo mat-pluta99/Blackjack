@@ -4,10 +4,9 @@ from time import sleep as sleep
 
 # TODO:
 # finish split()
-# make sure that hand power resets after each round!
 # make sure that the player wins a proper amount of chips for each hand, when he splits his initial hand
 # make sure that dealer does not draw if every player has either busted, folded or scored a blackjack without additional drawing
-# ask if players want to stop or play again (partly implemented)
+# if no players are left, stop the game
 # if a player wants to stop and has enough chips to break a highscore, save his record to the ranking board in the menu
 # create a menu, where one can start a new game, see a ranking board or quit the game
 # describe a program and its functions!
@@ -105,6 +104,7 @@ class Player(Contestant):
         self.name = input("Enter a name: ")
         self.chips = 3000
         self.play_again = True
+        self.split = False
 
     def make_bet(self):
         while True:
@@ -133,6 +133,7 @@ class Player(Contestant):
 
     def fold(self):
         print(self.name, "folds.")
+        self.bet = int(self.bet / 2)
         self.folded = True
 
     def lose(self):
@@ -159,9 +160,9 @@ class Player(Contestant):
             print("c- call", end=" ")
             if len(self.hand) < 3 and self.bet <= (self.chips * 2):
                 print("d- double down", end=" ")
-            if self.hand[0].name == self.hand[1].name and len(self.hand) < 3:
-                print("spl - split")
-            print("s- stand", "f - fold", end=" ")
+            print("s- stand", end=" ")
+            if self.split == False:
+                print("f - fold (surrender)", end=" ")
             print("| hand power:", self.hand_power)
             while True:
                 choice = input("Enter a choice: ")
@@ -178,12 +179,14 @@ class Player(Contestant):
                     elif choice == "f":
                         self.fold()
                         self.turn_ended = True
+                        """
                     elif (
                         choice == "spl"
                         and self.hand[0].name == self.hand[1].name
                         and len(self.hand) < 3
                     ):
                         self.split()
+                        """
                     else:
                         raise
                 except:
@@ -302,7 +305,9 @@ def round_():
             )
             sleep(1.2)
         if any(
-            player.busted == False and player.folded == False
+            player.busted == False
+            and player.folded == False
+            and (player.hand_power == 21 and len(player.hand) == 2) == False
             for player in Contestant.contestants[1:]
         ):
             while dealer.hand_power < 17:
@@ -343,6 +348,33 @@ def round_():
                     print(player.name, "ties with the dealer!")
 
                     sleep(1.5)
+        elif any(
+            player.busted == False
+            and player.folded == False
+            and (player.hand_power == 21 and len(player.hand) == 2) == True
+            for player in Contestant.contestants[1:]
+        ):
+            for player in Contestant.contestants[1:]:
+                if player.busted == True:
+                    print("By busting,", end=" ")
+                    player.lose()
+                elif player.folded == True:
+                    print("By folding,", end=" ")
+                    player.lose()
+                elif (
+                    player.hand_power == 21
+                    and len(player.hand == 2)
+                    and player.hand_power > dealer.hand_power
+                ):
+                    print(
+                        "By {name} having a Blackjack and Dealer not having one,".format(
+                            name=player.name
+                        )
+                    )
+                    player.win()
+                else:
+                    print(player.name, "ties with the dealer!")
+
         else:
             print("Every player has either busted or folded!")
             for player in Contestant.contestants[1:]:
