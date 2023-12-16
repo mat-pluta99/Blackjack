@@ -1,6 +1,7 @@
 import random
 from time import sleep as sleep
-
+import sys
+import os
 
 # TODO:
 # finish split()
@@ -228,13 +229,15 @@ def game():
                 if another_round.startswith("N") or another_round.startswith("n"):
                     player.play_again = False
                     print("See you around, {name}!".format(name=player.name))
+                    sleep(1)
         if any(player.play_again == True for player in Contestant.contestants[1:]):
             pass
         else:
-            break
+            menu()
 
 
 def round_():
+    os.system("cls")
     shuffle_deck()
     contestants_amount = len(Contestant.contestants)
     for i in range(0, contestants_amount - 1):
@@ -251,6 +254,7 @@ def round_():
         for contestant in Contestant.contestants
         if contestant.name == "Dealer" or contestant.play_again == True
     ]
+
     Contestant.contestants = list_of_remaining
     print("Remaining players:")
     for player in Contestant.contestants[1:]:
@@ -258,6 +262,7 @@ def round_():
         player.turn_ended = False
         player.folded = False
         print(player.name, "with", player.chips, "chips")
+    sleep(1)
     for player in Contestant.contestants[1:]:
         player.make_bet()
     for i in range(2):
@@ -386,6 +391,28 @@ def round_():
             print("Every player has either busted or folded!")
             for player in Contestant.contestants[1:]:
                 player.lose()
+    sleep(2)
 
 
-game()
+def menu():
+    os.system("cls")
+    print("Blackjack.py by Mateusz Pluta https://github.com/mat-pluta99")
+    print()
+    print("-------BLACKJACK CASINO-------")
+    print("1. Play the game")
+    print("2. Leaderboard")
+    print("3. Quit the game")
+    menu_choice = input("Enter your choice: ")
+    while True:
+        if menu_choice[0] == "1":
+            game()
+        elif menu_choice[0] == "2":
+            pass
+        elif menu_choice[0] == "3":
+            print("See you soon!")
+            sleep(1)
+            sys.exit()
+
+
+if __name__ == "__main__":
+    menu()
