@@ -157,6 +157,9 @@ class Player(Contestant):
                 self.turn_ended = True
                 self.busted = True
                 break
+            elif self.hand_power == 21:
+                self.turn_ended = True
+                break
             print("c- call", end=" ")
             if len(self.hand) < 3 and self.bet <= (self.chips * 2):
                 print("d- double down", end=" ")
@@ -225,6 +228,10 @@ def game():
                 if another_round.startswith("N") or another_round.startswith("n"):
                     player.play_again = False
                     print("See you around, {name}!".format(name=player.name))
+        if any(player.play_again == True for player in Contestant.contestants[1:]):
+            pass
+        else:
+            break
 
 
 def round_():
