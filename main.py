@@ -102,7 +102,18 @@ class Contestant:
 class Player(Contestant):
     def __init__(self):
         Contestant.__init__(self)
-        self.name = input("Enter a name: ")
+        while True:
+            self.name = input("Enter a name: ")
+            if not self.name.strip():
+                print("You did not enter anything!")
+                sleep(0.5)
+            elif any(
+                self.name == player.name for player in Contestant.contestants[:-1]
+            ):
+                print("This name already exist, please choose enter something else.")
+                sleep(0.5)
+            else:
+                break
         self.chips = 3000
         self.play_again = True
         self.split = False
