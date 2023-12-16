@@ -104,7 +104,7 @@ class Player(Contestant):
         self.chips = 3000
         self.folded = False
 
-    def bet(self):
+    def make_bet(self):
         while True:
             try:
                 self.bet = int(
@@ -115,6 +115,7 @@ class Player(Contestant):
                     )
                 )
                 if self.bet in range(1, 501) and self.bet in range(1, self.chips + 1):
+                    print("DUPA")
                     break
             except ValueError:
                 print(
@@ -140,7 +141,6 @@ class Player(Contestant):
         sleep(1.2)
 
     def win(self):
-        self.bet = int(self.bet)
         print(self.name, "wins", self.bet, "chips!")
         self.chips += self.bet
         sleep(1.2)
@@ -195,7 +195,6 @@ class Player(Contestant):
 
 def game():
     deck = shuffle_deck()
-
     while True:
         try:
             how_many_players = int(input("Enter the amount of players (max. 5): "))
@@ -231,7 +230,7 @@ def round_():
     move_dealer = Contestant.contestants.pop()
     Contestant.contestants.insert(0, move_dealer)
     for player in Contestant.contestants[1:]:
-        player.bet()
+        player.make_bet()
     for i in range(2):
         for player in Contestant.contestants:
             player.draw()
