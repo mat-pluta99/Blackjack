@@ -259,7 +259,6 @@ def round_():
     contestants_amount = len(Contestant.contestants)
     for i in range(0, contestants_amount - 1):
         contestant = Contestant.contestants[i]
-        print(contestant.name)
         if contestant.name == "Dealer" or contestant.play_again == False:
             Contestant.contestants.remove(contestant)
             i -= 1
@@ -425,6 +424,7 @@ def menu():
         if menu_choice[0] == "1":
             game()
         elif menu_choice[0] == "2":
+            os.system("cls")
             see_leaderboard()
             menu()
         elif menu_choice[0] == "3":
