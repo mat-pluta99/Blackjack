@@ -3,16 +3,13 @@ from time import sleep as sleep
 import sys
 import os
 
-# TODO:
-# REPAIR THE LEADERBOARD
-# finish split()
-# make sure that the player wins a proper amount of chips for each hand, when he splits his initial hand
-# make sure that dealer does not draw if every player has either busted, folded or scored a blackjack without additional drawing
-# if no players are left, stop the game
-# if a player wants to stop and has enough chips to break a highscore, save his record to the ranking board in the menu
-# create a menu, where one can start a new game, see a ranking board or quit the game
-# describe a program and its functions!
-# make sure a player cant draw no more if they have a hand power of 21
+# -------------- WORK IN PROGRESS ----------------
+# this is an attempt at adding a possibility to split a hand during the game, but the game does not work
+
+# the dealer is draws his first card and after that, that card's power is added to the dealer's hand power
+# then the player draws his first card, but the program crashes when trying to add a power to player's first hand
+
+# i did not test the rest of the code, so it may be full of bugs
 
 
 # -----INITIALIZING A DECK OF 52 CARDS-----
@@ -57,10 +54,11 @@ for name in card_names:
 
 def shuffle_deck():
     for contestant in Contestant.contestants:
-        contestant.hand_power = 0
-        while len(contestant.hand) != 0:
-            popped_card = contestant.hand.pop(0)
-            deck.append(popped_card)
+        contestant.hand_power = [0][0]
+        for i in range(2):
+            while len(contestant.hand[i]) != 0:
+                popped_card = contestant.hand.pop(0)
+                deck.append(popped_card)
     random.shuffle(deck)
     return deck
 
@@ -70,33 +68,44 @@ class Contestant:
 
     def __init__(self):
         self.name = "Dealer"
-        self.hand = list()
-        self.hand_power = 0
+        self.hand = [[], []]
+        self.hand_power = [0, 0]
         self.busted = False
         self.turn_ended = False
+        self.split = False
+        self.chosen_hand = 0
         Contestant.contestants.append(self)
 
     def draw(self):
+        i = 0
         drawn_card = deck.pop(0)
-        self.hand.append(drawn_card)
-        if self.name == "Dealer" and len(self.hand) == 2:
+        self.hand[i].append(drawn_card)
+        if self.name == "Dealer" and len(self.hand[0]) == 2:
             print("Dealer draws a second card.")
         else:
             print(self.name, "draws", drawn_card.name, "of", drawn_card.color)
-        self.hand_power += drawn_card.power
-        if self.hand_power > 21:
-            for card in self.hand:
+        self.hand_power[i] += drawn_card.power
+
+        if self.hand_power[i] > 21:
+            for card in self.hand[i]:
                 if card.power == 11:
                     card.power -= 10
-                    self.hand_power -= 10
-                if self.hand_power < 21:
+                    self.hand_power[i] -= 10
+                if self.hand_power[i] < 21:
                     break
-            if self.hand_power > 21:
-                self.busted = True
-                print(self.name, "busts!")
+            if self.hand_power[i] > 21:
+                if self.split == True:
+                    print(
+                        "{name} busts on a hand number {n}!".format(name=self.name, n=i)
+                    )
+                else:
+                    self.busted = True
+                    print(self.name, "busts!")
 
     def stand(self):
-        print(self.name, "stands with a hand power of", self.hand_power)
+        print(
+            self.name, "stands with a hand power of", self.hand_power[self.chosen_hand]
+        )
         sleep(1.2)
 
 
@@ -118,6 +127,7 @@ class Player(Contestant):
         self.chips = 3000
         self.play_again = True
         self.split = False
+        self.split_double = False
 
     def make_bet(self):
         while True:
@@ -131,15 +141,15 @@ class Player(Contestant):
                 )
                 if self.bet in range(1, 501) and self.bet in range(1, self.chips + 1):
                     break
-                else:
-                    raise
-            except:
+            except ValueError:
                 print(
                     "Wrong input, please bet from min. 1  to max. 500 chips. If you have less than 500 chips, you can only bet up to an amount of chips you have left."
                 )
 
     def double_down(self):
         print(self.name, "doubles down!")
+        if self.split == True:
+            self.split_double = True
         self.bet *= 2
         self.draw()
 
@@ -162,49 +172,77 @@ class Player(Contestant):
         self.chips += self.bet
         sleep(1.2)
 
-    def split(self):
-        for card in self.hand:
-            pass
+    def split_hand(self):
+        self.split = True
+        move_card = self.hand[0].pop(1)
+        self.hand[1].append(move_card)
 
     def choice(self):
-        while self.turn_ended is False:
-            if self.hand_power > 21:
-                self.turn_ended = True
+        self.chosen_hand = 0
+        turn_ended = False
+        while turn_ended is False:
+            i = self.chosen_hand
+            if self.split == True:
+                if self.hand_power[0] > 21 and self.hand_power[1] > 21:
+                    turn_ended = True
+                    self.busted = True
+                    break
+            elif self.hand_power[0] > 21:
+                turn_ended = True
                 self.busted = True
                 break
-            elif self.hand_power == 21:
-                self.turn_ended = True
+            elif self.hand_power[0] == 21:
+                turn_ended = True
                 break
             print("c- call", end=" ")
-            if len(self.hand) < 3 and self.bet <= (self.chips * 2):
+            if len(self.hand[i]) < 3 and self.bet <= (self.chips * 2) and i == 0:
                 print("d- double down", end=" ")
             print("s- stand", end=" ")
+            if len(self.hand[0] == 2 and self.hand[0][0] == self.hand[0][1]):
+                self.split_hand()
             if self.split == False:
                 print("f - fold (surrender)", end=" ")
-            print("| hand power:", self.hand_power)
+            print("| hand power:", self.hand_power[i])
             while True:
+                if self.split == True:
+                    print(
+                        "{name}'s hand {n}".format(name=self.name, n=self.chosen_hand)
+                    )
                 choice = input("Enter a choice: ")
                 try:
                     choice = choice.lower()
                     if choice == "c":
                         self.call()
-                    elif choice == "d" and len(self.hand) < 3:
+                    elif choice == "d" and len(self.hand) < 3 and self.chosen_hand == 0:
                         self.double_down()
-                        self.turn_ended = True
+                        if (
+                            self.split == False
+                            or self.split == True
+                            and self.chosen_hand == 1
+                        ):
+                            turn_ended = True
+                        else:
+                            self.chosen_hand = 1
                     elif choice == "s":
                         self.stand()
-                        self.turn_ended = True
+                        if (
+                            self.split == False
+                            or self.split == True
+                            and self.chosen_hand == 1
+                        ):
+                            turn_ended = True
+                        else:
+                            self.chosen_hand = 1
                     elif choice == "f":
                         self.fold()
-                        self.turn_ended = True
-                        """
+                        turn_ended = True
+
                     elif (
                         choice == "spl"
-                        and self.hand[0].name == self.hand[1].name
+                        and self.hand[0][0].name == self.hand[0][1].name
                         and len(self.hand) < 3
                     ):
-                        self.split()
-                        """
+                        self.split_hand()
                     else:
                         raise
                 except:
@@ -241,8 +279,6 @@ def game():
             else:
                 another_round = input("Do you want to play another game? (y/n): ")
                 if another_round.startswith("N") or another_round.startswith("n"):
-                    if player.chips > int(ranking[-1][1]):
-                        add_to_leaderboard(player.name, player.chips)
                     player.play_again = False
                     print("See you around, {name}!".format(name=player.name))
                     sleep(1)
@@ -275,8 +311,9 @@ def round_():
     print("Remaining players:")
     for player in Contestant.contestants[1:]:
         player.busted = False
-        player.turn_ended = False
+        player.chosen_hand = 0
         player.folded = False
+        player.split = False
         print(player.name, "with", player.chips, "chips")
     sleep(1)
     for player in Contestant.contestants[1:]:
@@ -285,33 +322,33 @@ def round_():
         for player in Contestant.contestants:
             player.draw()
             sleep(1.2)
-    if dealer.hand_power == 21:
+    if dealer.hand_power[0] == 21:
         print("The dealer has a Blackjack!")
         sleep(1.1)
     player_blackjacks = 0
     for player in Contestant.contestants[1:]:
-        if player.hand_power == 21:
+        if player.hand_power[0] == 21:
             print(player.name, "has a Blackjack!")
             sleep(1.1)
             player_blackjacks += 1
-        if player.hand_power == 21 and dealer.hand_power == 21:
+        if player.hand_power[0] == 21 and dealer.hand_power[0] == 21:
             print(player.name, "ties with the Dealer!")
             sleep(1.1)
-        elif player.hand_power == 21 and dealer.hand_power != 21:
+        elif player.hand_power[0] == 21 and dealer.hand_power[0] != 21:
             player.bet *= 3 / 2
             player.win()
-        elif player.hand_power != 21 and dealer.hand_power == 21:
+        elif player.hand_power[0] != 21 and dealer.hand_power[0] == 21:
             player.bet *= 3 / 2
             player.lose()
     if (
         len(Contestant.contestants[1:]) == player_blackjacks
         or player_blackjacks == 0
-        and dealer.hand_power == 21
+        and dealer.hand_power[0] == 21
     ):
         pass
     else:
         for player in Contestant.contestants[1:]:
-            if player.hand_power == 21:
+            if player.hand_power[0] == 21:
                 pass
             else:
                 print("---{name}'s turn---".format(name=player.name))
@@ -325,61 +362,91 @@ def round_():
             sleep(1)
             print(
                 "The dealer's hand:",
-                dealer.hand[0],
+                dealer.hand[0][0],
                 "and",
-                dealer.hand[1],
+                dealer.hand[0][1],
                 "| hand power:",
-                dealer.hand_power,
+                dealer.hand_power[0],
             )
             sleep(1.2)
         if any(
             player.busted == False
             and player.folded == False
-            and (player.hand_power == 21 and len(player.hand) == 2) == False
+            and (player.hand_power[0] == 21 and len(player.hand[0]) == 2) == False
             for player in Contestant.contestants[1:]
         ):
-            while dealer.hand_power < 17:
+            while dealer.hand_power[0] < 17:
                 dealer.draw()
-            if dealer.hand_power < 21:
+            if dealer.hand_power[0] < 21:
                 dealer.stand()
             for player in Contestant.contestants[1:]:
                 if player.folded:
                     print("By folding,", end=" ")
                     player.lose()
                     continue
-                if player.hand_power == 21 and len(player.hand) == 2:
+                if player.hand_power[0] == 21 and len(player.hand[0]) == 2:
                     continue
-                print("{name}'s cards are:".format(name=player.name), end=" ")
-                sleep(1.2)
-                for card in player.hand:
-                    print(card.__str__(), end=" ")
+                for i in range(0, 2):
+                    if player.split == False and i == 1:
+                        continue
+                    if player.split == True:
+                        print("Hand", player.chosen_hand)
+                    print("{name}'s cards are:".format(name=player.name), end=" ")
                     sleep(1.2)
-                print(
-                    "\n{name}'s hand power is {hand_power}.".format(
-                        name=player.name, hand_power=player.hand_power
+                    for card in player.hand[i]:
+                        print(card.__str__(), end=" ")
+                        sleep(1.2)
+                    print(
+                        "\n{name}'s hand power is {hand_power}.".format(
+                            name=player.name, hand_power=player.hand_power[i]
+                        )
                     )
-                )
                 sleep(1.3)
                 if (
-                    player.hand_power < dealer.hand_power
-                    and dealer.hand_power < 22
+                    player.hand_power[0] < dealer.hand_power[0]
+                    and dealer.hand_power[0] < 22
+                    and player.split == False
                     or player.busted == True
                 ):
                     player.lose()
                 elif (
-                    player.hand_power > dealer.hand_power
+                    player.hand_power[0] > dealer.hand_power[0]
                     or player.busted == False
                     and dealer.busted == True
                 ):
                     player.win()
-                else:
+                elif player.split == False:
                     print(player.name, "ties with the dealer!")
-
                     sleep(1.5)
+                elif player.split == True:
+                    split_bet = 0
+                    for i in range(2):
+                        if player.hand_power[i] > dealer.hand_power[0]:
+                            if player.split_double == True and i == 0:
+                                split_bet += player.bet
+                            split_bet += player.bet
+                            print("For a hand number {n}, {name} wins!")
+                            sleep(1)
+                        elif player.hand_power[i] < dealer.hand_power[0]:
+                            if player.split_double == True and i == 0:
+                                split_bet -= player.bet
+                            split_bet -= player.bet
+                            print("For a hand number {n}, {name} loses...")
+                            sleep(1)
+                        else:
+                            print("For a hand number {n}, {name} ties.")
+                            sleep(1)
+                    player.bet = split_bet
+                    if player.bet < 0:
+                        player.lose()
+                    elif player.bet > 0:
+                        player.win()
+                    else:
+                        print(player.name, "ties with the dealer!")
         elif any(
             player.busted == False
             and player.folded == False
-            and (player.hand_power == 21 and len(player.hand) == 2) == True
+            and (player.hand_power[0] == 21 and len(player.hand[0]) == 2) == True
             for player in Contestant.contestants[1:]
         ):
             for player in Contestant.contestants[1:]:
@@ -390,9 +457,9 @@ def round_():
                     print("By folding,", end=" ")
                     player.lose()
                 elif (
-                    player.hand_power == 21
-                    and len(player.hand == 2)
-                    and player.hand_power > dealer.hand_power
+                    player.hand_power[0] == 21
+                    and len(player.hand[0] == 2)
+                    and player.hand_power[0] > dealer.hand_power[0]
                 ):
                     print(
                         "By {name} having a Blackjack and Dealer not having one,".format(
@@ -411,7 +478,6 @@ def round_():
 
 
 def menu():
-    load_leaderboard()
     os.system("cls")
     print("Blackjack.py by Mateusz Pluta https://github.com/mat-pluta99")
     print()
@@ -419,65 +485,16 @@ def menu():
     print("1. Play the game")
     print("2. Leaderboard")
     print("3. Quit the game")
+    menu_choice = input("Enter your choice: ")
     while True:
-        menu_choice = input("Enter your choice: ")
         if menu_choice[0] == "1":
             game()
         elif menu_choice[0] == "2":
-            see_leaderboard()
-            menu()
+            pass
         elif menu_choice[0] == "3":
             print("See you soon!")
             sleep(1)
             sys.exit()
-        else:
-            print("There's no such option, please try again!")
-            sleep(1)
 
 
-def load_leaderboard():
-    global ranking
-    ranking = list()
-    f = open("leaderboard.txt", "r")
-    for line in f:
-        splitted_line = line.split(":")
-        name = splitted_line[0].strip()
-        score = splitted_line[1].strip()
-        record = (name, score)
-        ranking.append(record)
-    ranking.sort(key=lambda tup: int(tup[1]), reverse=True)
-    f.close()
-    return ranking
-
-
-def add_to_leaderboard(name, score):
-    global ranking
-    ranking.append((name, score))
-    ranking.sort(key=lambda tup: int(tup[1]), reverse=True)
-    ranking = ranking[0:10]
-    place = ranking.index((name, score))
-    print(
-        "Congratulations for beating the record, {name}!! You're now the {n}.luckiest player in the ranking!".format(
-            name=name, n=place + 1
-        )
-    )
-    sleep(2)
-    f = open("leaderboard.txt", "w")
-    for score in ranking:
-        f.write(score[0] + " : " + str(score[1]) + "\n")
-    f.close()
-    return ranking
-
-
-def see_leaderboard():
-    global ranking
-    print("-----THE LUCKY 10-----")
-    i = 1
-    for score in ranking:
-        print("{i}. {name} - {record}".format(i=i, name=score[0], record=score[1]))
-        i += 1
-    anything = input("Press ENTER to close the leaderboard...")
-
-
-if __name__ == "__main__":
-    menu()
+menu()

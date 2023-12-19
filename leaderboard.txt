@@ -1,10 +1,10 @@
-Courier : 12000
-Yes Man : 11000
-Robert : House 10000
-Father : Elijah 9750
-Caesar : 9500
-Legate : Lanius 9000
-President : Kimball 8500
-Lee Oliver : 8000
+Robert House : 10000
 Benny : 7000
-Swanick : 4000
+Courier : 12000
+Legate Lanius : 9000
+Yes Man : 11000
+Caesar : 9500
+President Kimball : 8500
+Father Elijah : 9750
+Lee Oliver : 8000
+Swanick : 5000
