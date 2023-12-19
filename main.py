@@ -3,17 +3,6 @@ from time import sleep as sleep
 import sys
 import os
 
-# TODO:
-# REPAIR THE LEADERBOARD
-# finish split()
-# make sure that the player wins a proper amount of chips for each hand, when he splits his initial hand
-# make sure that dealer does not draw if every player has either busted, folded or scored a blackjack without additional drawing
-# if no players are left, stop the game
-# if a player wants to stop and has enough chips to break a highscore, save his record to the ranking board in the menu
-# create a menu, where one can start a new game, see a ranking board or quit the game
-# describe a program and its functions!
-# make sure a player cant draw no more if they have a hand power of 21
-
 
 # -----INITIALIZING A DECK OF 52 CARDS-----
 class Card:
@@ -56,6 +45,9 @@ for name in card_names:
 
 
 def shuffle_deck():
+    """
+    shuffle_deck() takes all the cards from each player's hand, zeroes its power, puts theses cards back to the deck and then this deck is shuffled
+    """
     global deck
     for contestant in Contestant.contestants:
         contestant.hand_power = 0
@@ -67,6 +59,8 @@ def shuffle_deck():
 
 
 class Contestant:
+    """This is a base class of each contestant in the game, including a dealer controlled by a computer. A contestant is able to draw a card to their hand, raise their hand power and bust by having a more powerful hand than 21 or have their turn ended after making a choice to stand, drawing 21 or busting"""
+
     contestants = list()
 
     def __init__(self):
@@ -102,6 +96,10 @@ class Contestant:
 
 
 class Player(Contestant):
+    """
+    This is a class of every player, except for the dealer. A player can choose their name, enter their bets, choose to call, double down, stand or fold. If they beat any high score from the leaderboard(see "leaderboard.txt"), their name and score is saved.
+    """
+
     def __init__(self):
         Contestant.__init__(self)
         while True:
@@ -118,7 +116,6 @@ class Player(Contestant):
                 break
         self.chips = 3000
         self.play_again = True
-        self.split = False
 
     def make_bet(self):
         while True:
@@ -163,10 +160,6 @@ class Player(Contestant):
         self.chips += self.bet
         sleep(1.2)
 
-    def split(self):
-        for card in self.hand:
-            pass
-
     def choice(self):
         while self.turn_ended is False:
             if self.hand_power > 21:
@@ -180,8 +173,7 @@ class Player(Contestant):
             if len(self.hand) < 3 and self.bet <= (self.chips * 2):
                 print("d- double down", end=" ")
             print("s- stand", end=" ")
-            if self.split == False:
-                print("f - fold (surrender)", end=" ")
+            print("f - fold (surrender)", end=" ")
             print("| hand power:", self.hand_power)
             while True:
                 choice = input("Enter a choice: ")
@@ -198,14 +190,6 @@ class Player(Contestant):
                     elif choice == "f":
                         self.fold()
                         self.turn_ended = True
-                        """
-                    elif (
-                        choice == "spl"
-                        and self.hand[0].name == self.hand[1].name
-                        and len(self.hand) < 3
-                    ):
-                        self.split()
-                        """
                     else:
                         raise
                 except:
@@ -216,6 +200,11 @@ class Player(Contestant):
 
 
 def game():
+    """
+    game() function asks for the amount of players, initiates them and then starts a round. If a player has no chips after a round, they lose and are kicked out of the game. If a player still has any chips left, they can either continue playing or quit the game.
+
+    If they quit, their score is compared to the leaderboard and, if the player has beaten any highscore, their name and score are appended to the ranking list. Then that ranking list is used to save the best 10 scores ever beaten in this game and write them in the "leaderboard.txt" file.
+    """
     shuffle_deck()
     while True:
         try:
@@ -254,6 +243,15 @@ def game():
 
 
 def round_():
+    """
+    round_() function controls the flow of a round of the game. The deck is shuffled by shuffle_deck() function and each contestand draws 2 cards to his hand, 1 card at a time.
+
+    Then, the dealer's and the players' hand powers are compared if they have blackjack. If there is no hand power of 21, then players make choices to either call, double down or fold from the round.
+
+    After that, the dealer draws until he either busts or has a hand power of 17 or more.
+
+    At the end, the players' hand powers are compared to the dealer's hand power. Depending of the powers, the players can either win a round and add their bets to their chips, lose a round and their amount of chips is reduced by their bet, or tie with the dealer.
+    """
     os.system("cls")
     shuffle_deck()
     contestants_amount = len(Contestant.contestants)
@@ -437,6 +435,9 @@ def menu():
 
 
 def load_leaderboard():
+    """
+    load_leadeboard() function loads the list of scores from a file "leaderboard.txt" and then saved them to a list named ranking.
+    """
     global ranking
     ranking = list()
     f = open("leaderboard.txt", "r")
@@ -452,6 +453,7 @@ def load_leaderboard():
 
 
 def add_to_leaderboard(name, score):
+    """add_to_leaderboard() function adds a new highscore to the ranking and then rewrites the "leaderboard.txt" file with the updated list of the 10 best high scores ever achieved in the game."""
     global ranking
     ranking.append((name, score))
     ranking.sort(key=lambda tup: int(tup[1]), reverse=True)
@@ -471,6 +473,9 @@ def add_to_leaderboard(name, score):
 
 
 def see_leaderboard():
+    """
+    see_leaderboard() prints the best 10 scores for a user to see.
+    """
     global ranking
     print("-----THE LUCKY 10-----")
     i = 1
