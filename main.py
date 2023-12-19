@@ -56,6 +56,7 @@ for name in card_names:
 
 
 def shuffle_deck():
+    global deck
     for contestant in Contestant.contestants:
         contestant.hand_power = 0
         while len(contestant.hand) != 0:
@@ -215,7 +216,7 @@ class Player(Contestant):
 
 
 def game():
-    deck = shuffle_deck()
+    shuffle_deck()
     while True:
         try:
             how_many_players = int(input("Enter the amount of players (max. 5): "))
